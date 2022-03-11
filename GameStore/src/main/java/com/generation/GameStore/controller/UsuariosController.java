@@ -1,6 +1,9 @@
 package com.generation.GameStore.controller;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,53 +20,40 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.generation.GameStore.model.*;
 import com.generation.GameStore.repository.UsuariosRepository;
+import com.generation.GameStore.service.UsuarioService;
 
 @RestController
 @CrossOrigin ( origins  =   " * " , allowedHeaders  =  " * " )
 @RequestMapping ("/usuarios")
-public class UsuariosController {
+public class UsuariosController<PostagemModel> {
+
 	@Autowired
-	private UsuariosRepository repository;
+	private UsuarioService usuarioService;
 	
-	@GetMapping
-	public List<Usuarios>GetAll(){
-		return repository.findAll();
+	@Autowired
+	private UsuariosRepository usuarioRepository;
+	
+	
+	@GetMapping("/all")
+	 public  ResponseEntity < List< Usuarios > > getAll (){
+        return  ResponseEntity.ok(usuarioRepository . findAll());
+    }
+	
+	@PostMapping("/login")
+	public ResponseEntity<UsuarioLogin> Autentication(@RequestBody Optional<UsuarioLogin> user){
+		return usuarioService.autenticarUsuario(user)
+			.map(resposta -> ResponseEntity.ok(resposta))
+			.orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
-
-	@GetMapping("/{id}")
-    public ResponseEntity<Usuarios> GetById(@PathVariable long id) {
-    	return repository.findById(id)
-    			.map(resp -> ResponseEntity.ok(resp))
-    			.orElse(ResponseEntity.notFound().build());
-    	}
-
 	
-	@GetMapping("/nome/{nome}")
-    public ResponseEntity<List<Usuarios>> getByName(@PathVariable String nome){
-	 return ResponseEntity.ok(repository.findAllByDescricaoContainingIgnoreCase(nome));
- }
-	
-
-	
-    @PostMapping
-    public ResponseEntity<Usuarios> post (@RequestBody Usuarios usuarios) {
-	return ResponseEntity.status(HttpStatus.CREATED)
-			.body(repository.save(usuarios));
-}
- 
-    @PutMapping
-    public ResponseEntity<Usuarios> put (@RequestBody Usuarios usuarios){
-	 return ResponseEntity.ok(repository.save(usuarios));
-	 
- }
- 
-    
-    
-   @DeleteMapping("/{id}")
-   public void delete(@PathVariable long id) {
-	 repository.deleteById(id);
-
-}
-	
+	@PostMapping("/cadastrar")
+	public ResponseEntity<Usuarios> postUsuario(@Valid @RequestBody Usuarios usuario){
+		return usuarioService.cadastrarUsuario(usuario)
+				.map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(resposta))
+				.orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+		
+	}
 	
 }
+	
+	

@@ -37,13 +37,17 @@ public class JogosController {
     			.orElse(ResponseEntity.notFound().build());
     	}
 
-	
+
 	@GetMapping("/nome/{nome}")
     public ResponseEntity<List<Jogos>> getByName(@PathVariable String nome){
 	 return ResponseEntity.ok(repository.findAllByDescricaoContainingIgnoreCase(nome));
  }
 	
 
+	@GetMapping("/descricao/{descricao}")
+    public ResponseEntity<List<Jogos>> getBydescricao(@PathVariable String descricao){
+	 return ResponseEntity.ok(repository.findAllByDescricaoContainingIgnoreCase(descricao));
+ }
 	
     @PostMapping
     public ResponseEntity<Jogos> post (@RequestBody Jogos jogos) {
